@@ -1,10 +1,10 @@
-package com.phumlanidev.order_service;
+package com.phumlanidev.orderservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class OrderserviceApplicationTests {
+class OrderServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

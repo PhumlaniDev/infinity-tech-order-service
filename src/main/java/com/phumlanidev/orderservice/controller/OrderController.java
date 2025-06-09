@@ -1,6 +1,7 @@
 package com.phumlanidev.orderservice.controller;
 
 import com.phumlanidev.orderservice.service.impl.OrdersServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +26,7 @@ public class OrderController {
    * Comment: this is the placeholder for documentation.
    */
   @PostMapping("/place-order")
-  public ResponseEntity<Void> placeOrder(@AuthenticationPrincipal Jwt jwt) {
+  public ResponseEntity<Void> placeOrder(@Valid @AuthenticationPrincipal Jwt jwt) {
     ordersService.placeOrder(jwt.getSubject());
     return ResponseEntity.ok().build();
   }

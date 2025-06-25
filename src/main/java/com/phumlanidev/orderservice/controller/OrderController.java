@@ -1,5 +1,6 @@
 package com.phumlanidev.orderservice.controller;
 
+import com.phumlanidev.orderservice.dto.OrderDto;
 import com.phumlanidev.orderservice.service.impl.OrdersServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -7,9 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Comment: this is the placeholder for documentation.
@@ -31,12 +30,18 @@ public class OrderController {
     return ResponseEntity.ok().build();
   }
 
-  //  @GetMapping("/{orderId}")
-  //  public ResponseEntity<OrderDto> getOrderDetails(@PathVariable Long orderId) {
-  ////    OrderDto orderDto = ordersService.getOrderDetails(orderId);
-  ////    return ResponseEntity.ok(orderDto);
-  //  }
-  //
+  @PutMapping("/mark-paid/{orderId}")
+  public ResponseEntity<Void> markOrderAsPaid(@PathVariable Long orderId) {
+    ordersService.markOrderAsPaid(orderId);
+    return ResponseEntity.ok().build();
+  }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderDto> getOrderDetails(@PathVariable Long orderId) {
+      OrderDto orderDto = ordersService.getOrderById(orderId);
+      return ResponseEntity.ok(orderDto);
+    }
+
   //  /**
   //   * Comment: this is the placeholder for documentation.
   //   */

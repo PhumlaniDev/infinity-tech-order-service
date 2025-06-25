@@ -12,5 +12,6 @@ public enum OrderStatus {
   ON_HOLD,       // Order is temporarily paused
   COMPLETED,     // Order has been fully processed and fulfilled
   RETURNED,       // Order has been returned by the customer
-  PLACED         // Order has been placed by the customer
+  PLACED,         // Order has been placed by the customer
+  PAID           // Order has been paid for
 }

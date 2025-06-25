@@ -1,6 +1,7 @@
 package com.phumlanidev.orderservice.service;
 
 import com.phumlanidev.orderservice.dto.OrderDto;
+
 import java.util.List;
 
 /**
@@ -24,11 +25,13 @@ public interface IOrdersService {
    */
   List<OrderDto> getAllOrders();
 
+  void markOrderAsPaid(Long orderId);
+
 
   //  /**
   //   * Comment: this is the placeholder for documentation.
   //   */
-  //  OrderDto getOrderDetails(Long orderId);
+    OrderDto getOrderById(Long orderId);
   //
   //
   //

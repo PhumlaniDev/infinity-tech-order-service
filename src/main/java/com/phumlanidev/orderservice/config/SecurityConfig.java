@@ -8,9 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Comment: this is the placeholder for documentation.
- */
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
@@ -18,9 +15,6 @@ public class SecurityConfig {
 
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
-  /**
-   * Comment: this is the placeholder for documentation.
-   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
@@ -30,8 +24,11 @@ public class SecurityConfig {
             .requestMatchers("/v3/api-docs/**").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/v1/orders/admin").hasRole("admin")
-            .requestMatchers("/api/v1/order/**").authenticated()
+            .requestMatchers("/api/v1/order/mark-paid").hasRole("order-service-role")
+                            .requestMatchers("/api/v1/notifications/payment-confirmation")
+                            .hasRole("notification-service-role")
+                    .requestMatchers("/api/v1/order/admin").hasRole("admin")
+            .requestMatchers("/api/v1/order/**").hasRole("order-service-role")
             )
             .oauth2ResourceServer(oauth2 ->
                     oauth2.jwt(jwt ->

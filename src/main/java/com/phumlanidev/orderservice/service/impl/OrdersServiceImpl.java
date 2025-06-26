@@ -84,24 +84,9 @@ public class OrdersServiceImpl implements IOrdersService {
 
     orderRepository.save(order);
 
-    String clientIp = request.getRemoteAddr();
-    Jwt jwt = null;
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = "anonymous";
-    String emailRecipient = null;
-    if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt j) {
-      jwt = j;
-      userId = jwt.getSubject(); // Keycloak userId (UUID)
-      username = jwt.getSubject(); // Keycloak username
-      emailRecipient = jwtAuthenticationConverter.extractUserEmail(jwt);
-    }
-
-    auditLogService.log(
-            "ORDER_PLACED",
-            userId,
-            username,
-            clientIp,
-            "Order placed successfully");
+    logAudit("ORDER_PLACED", "Order placed successfully for user: " + userId);
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
+    String emailRecipient = jwtAuthenticationConverter.extractUserEmail(jwt);
 
     OrderNotifyRequestDto notification = OrderNotifyRequestDto.builder()
             .userId(userId)
@@ -121,12 +106,53 @@ public class OrdersServiceImpl implements IOrdersService {
 
   @Override
   public List<OrderDto> getUserOrders(String userId) {
-    return List.of();
+    List<Order> orders = orderRepository.findByUserId(userId);
+    if (orders.isEmpty()) {
+      log.warn("No orders found for user: {}", userId);
+      return List.of();
+    }
+    log.info("Found {} orders for user: {}", orders.size(), userId);
+    logAudit("USER_ORDERS_RETRIEVED", "Retrieved orders for user: " + userId);
+    return orders.stream()
+            .map(order -> OrderDto.builder()
+                    .orderId(order.getOrderId())
+                    .userId(order.getUserId())
+                    .totalPrice(order.getTotalPrice())
+                    .items(order.getItems().stream()
+                            .map(item -> OrderItem.builder()
+                                    .productId(item.getProductId())
+                                    .quantity(item.getQuantity())
+                                    .priceAtPurchase(item.getPriceAtPurchase())
+                                    .build())
+                            .toList())
+                    .build())
+            .toList();
   }
 
   @Override
   public List<OrderDto> getAllOrders() {
-    return List.of();
+    List<Order> orders = orderRepository.findAll();
+    if (!orders.isEmpty()) {
+      log.info("Found {} orders in the system", orders.size());
+      logAudit("ALL_ORDERS_RETRIEVED", "Retrieved all orders");
+      return orders.stream()
+              .map(order -> OrderDto.builder()
+                      .orderId(order.getOrderId())
+                      .userId(order.getUserId())
+                      .totalPrice(order.getTotalPrice())
+                      .items(order.getItems().stream()
+                              .map(item -> OrderItem.builder()
+                                      .productId(item.getProductId())
+                                      .quantity(item.getQuantity())
+                                      .priceAtPurchase(item.getPriceAtPurchase())
+                                      .build())
+                              .toList())
+                      .build())
+              .toList();
+    } else {
+      log.warn("No orders found in the system");
+      return List.of();
+    }
   }
 
   @Override
@@ -139,6 +165,7 @@ public class OrdersServiceImpl implements IOrdersService {
     order.setUpdatedBy("SYSTEM"); // Assuming system update
     orderRepository.save(order);
     log.info("2. ✅ Order {} status changed to PAID", orderId);
+    logAudit("ORDER_PAID", "Order marked as paid: " + orderId);
 
   }
 
@@ -147,7 +174,7 @@ public class OrdersServiceImpl implements IOrdersService {
     Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException("Order not found"));
 
-    return OrderDto.builder()
+    OrderDto orderDto = OrderDto.builder()
             .orderId(order.getOrderId())
             .userId(order.getUserId())
             .totalPrice(order.getTotalPrice())
@@ -159,5 +186,24 @@ public class OrdersServiceImpl implements IOrdersService {
                             .build())
                     .toList())
             .build();
+    logAudit("ORDER_RETRIEVED", "Order retrieved successfully for orderId: " + orderId);
+    return orderDto;
+  }
+
+  private void logAudit(String action, String details) {
+    String clientIp = request.getRemoteAddr();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String username = auth != null ? auth.getName() : "anonymous";
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
+    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+
+
+    auditLogService.log(
+            action,
+            userId,
+            username,
+            clientIp,
+            details
+    );
   }
 }

@@ -14,9 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Comment: this is the placeholder for documentation.
- */
 @Component
 public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -85,17 +82,17 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
             .collect(Collectors.toSet());
   }
 
-  public Jwt getJwt() {
-    // get token value from the current authentication context
-    return (Jwt) org.springframework.security.core.context.SecurityContextHolder.getContext()
-            .getAuthentication().getPrincipal();
-  }
-
   public String extractUserEmail(Jwt jwt) {
     return jwt.getClaim("email");
   }
 
   public String extractUserId(Jwt jwt) {
     return jwt.getClaim("sub");
+  }
+
+  public Jwt getJwt() {
+    // get token value from the current authentication context
+    return (Jwt) org.springframework.security.core.context.SecurityContextHolder.getContext()
+            .getAuthentication().getPrincipal();
   }
 }

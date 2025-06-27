@@ -4,12 +4,13 @@ import com.phumlanidev.orderservice.dto.AuditLogDto;
 import com.phumlanidev.orderservice.model.AuditLog;
 import com.phumlanidev.orderservice.repository.AuditLogRepository;
 import com.phumlanidev.orderservice.utils.AuditLogSpecifications;
-import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
 
 /**
  * Comment: this is the placeholder for documentation.
@@ -40,8 +41,7 @@ public class AuditLogServiceImpl {
    * Comment: this is the placeholder for documentation.
    */
   public Page<AuditLogDto> getAuditLogs(String userId, String action, Pageable pageable) {
-    Specification<AuditLog> spec = Specification.where(
-                    AuditLogSpecifications.hasUserId(userId))
+    Specification<AuditLog> spec = AuditLogSpecifications.hasUserId(userId)
             .and(AuditLogSpecifications.hasAction(action));
 
     return auditLogRepository.findAll(spec, pageable).map(this::toDto);

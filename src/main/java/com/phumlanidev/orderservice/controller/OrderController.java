@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Comment: this is the placeholder for documentation.
  */
@@ -21,9 +23,17 @@ public class OrderController {
 
   private final OrdersServiceImpl ordersService;
 
-  /**
-   * Comment: this is the placeholder for documentation.
-   */
+  @GetMapping("/all")
+  public ResponseEntity<List<OrderDto>> getAllOrders() {
+    List<OrderDto> orders = ordersService.getAllOrders();
+    return ResponseEntity.ok(orders);
+  }
+
+  @GetMapping("/health")
+  public ResponseEntity<String> healthCheck() {
+    return ResponseEntity.ok("Order service is up and running!");
+  }
+
   @PostMapping("/place-order")
   public ResponseEntity<Void> placeOrder(@Valid @AuthenticationPrincipal Jwt jwt) {
     ordersService.placeOrder(jwt.getSubject());
@@ -45,29 +55,15 @@ public class OrderController {
   //  /**
   //   * Comment: this is the placeholder for documentation.
   //   */
-  //  @GetMapping("/user/{userId}")
-  //  public ResponseEntity<List<OrderDto>> getUserOrders(@PathVariable Long userId) {
-  ////    List<OrderDto> orders = ordersService.getUserOrders(userId);
-  ////    return ResponseEntity.ok(orders);
-  //  }
-  //
-  //  /**
-  //   * Comment: this is the placeholder for documentation.
-  //   */
-  //  @PutMapping("/{orderId}/status")
-  //  public ResponseEntity<OrderDto> updateOrderStatus(
-  //      @PathVariable Long orderId,
-  //      @RequestParam String status) {
-  ////    OrderDto updatedOrder = ordersService.updateOrderStatus(orderId, status);
-  ////    return ResponseEntity.ok(updatedOrder);
-  //  }
-  //
-  //  /**
-  //   * Comment: this is the placeholder for documentation.
-  //   */
-  //  @DeleteMapping("/{orderId}/cancel")
-  //  public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
-  ////    ordersService.cancelOrder(orderId);
-  ////    return ResponseEntity.noContent().build();
-  //  }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<OrderDto>> getUserOrders(@PathVariable String userId) {
+      List<OrderDto> orders = ordersService.getUserOrders(userId);
+      return ResponseEntity.ok(orders);
+    }
+
+  @DeleteMapping("/{orderId}/cancel")
+  public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
+    ordersService.cancelOrder(orderId);
+    return ResponseEntity.noContent().build();
+  }
 }

@@ -34,5 +34,5 @@ public class OrderDto {
   private String userId;
 
   @NotBlank(message = "Email is required")
-  private String email;
+  private String toEmail;
 }

@@ -42,7 +42,7 @@ public class CartServiceClient {
 
     HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
     ResponseEntity<String> rawResponse = restTemplate.exchange(
-            "http://localhost:8085/api/v1/cart",
+            "http://localhost:9200/api/v1/cart",
             HttpMethod.GET,
             requestEntity,
             String.class

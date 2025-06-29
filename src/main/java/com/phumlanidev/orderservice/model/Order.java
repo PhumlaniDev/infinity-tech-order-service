@@ -1,30 +1,17 @@
 package com.phumlanidev.orderservice.model;
 
 import com.phumlanidev.orderservice.enums.OrderStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Comment: this is the placeholder for documentation.
@@ -55,13 +42,14 @@ public class Order {
   private List<OrderItem> items = new ArrayList<>();
   @CreatedDate
   @Column(updatable = false)
-  private LocalDateTime createdAt;
+  @Builder.Default
+  private Instant createdAt = Instant.now();
   @CreatedBy
   @Column(updatable = false)
   private String createdBy;
   @LastModifiedDate
   @Column(insertable = false)
-  private LocalDateTime updatedAt;
+  private Instant updatedAt;
   @LastModifiedBy
   @Column(insertable = false)
   private String updatedBy;

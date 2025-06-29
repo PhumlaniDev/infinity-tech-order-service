@@ -27,22 +27,10 @@ public interface IOrdersService {
 
   void markOrderAsPaid(Long orderId);
 
+  OrderDto getOrderById(Long orderId);
 
-  //  /**
-  //   * Comment: this is the placeholder for documentation.
-  //   */
-    OrderDto getOrderById(Long orderId);
-  //
-  //
-  //
-  //  /**
-  //   * Comment: this is the placeholder for documentation.
-  //   */
   //  OrderDto updateOrderStatus(Long orderId, String status);
-  //
-  //  /**
-  //   * Comment: this is the placeholder for documentation.
-  //   */
-  //  void cancelOrder(Long orderId);
+
+    void cancelOrder(Long orderId);
 
 }

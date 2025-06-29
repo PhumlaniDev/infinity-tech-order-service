@@ -1,9 +1,10 @@
 package com.phumlanidev.orderservice.model;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.Instant;
 
 /**
  * Comment: this is the placeholder for documentation.
@@ -15,6 +16,6 @@ public class OrderPlacedEvent {
   private String userId;
   private Long orderId;
   private BigDecimal total;
-  private LocalDateTime timestamp;
+  private Instant timestamp;
 
 }

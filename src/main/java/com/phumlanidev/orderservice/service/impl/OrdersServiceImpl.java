@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +37,7 @@ public class OrdersServiceImpl implements IOrdersService {
   private final AuditLogServiceImpl auditLogService;
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
   private final NotificationClient notificationClient;
+//  private final UserClient userClient;
 
   @Override
   public void placeOrder(String userId) {
@@ -58,7 +58,6 @@ public class OrdersServiceImpl implements IOrdersService {
             //.totalPrice(totalPrice)
             .orderStatus(OrderStatus.PLACED)
             .items(new ArrayList<>())
-            .createdAt(LocalDateTime.now())
             .createdBy(userId)
             .build();
 
@@ -85,8 +84,8 @@ public class OrdersServiceImpl implements IOrdersService {
     orderRepository.save(order);
 
     logAudit("ORDER_PLACED", "Order placed successfully for user: " + userId);
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-    String emailRecipient = jwtAuthenticationConverter.extractUserEmail(jwt);
+    Jwt jwt = jwtAuthenticationConverter.getCurrentJwt();
+    String emailRecipient = jwtAuthenticationConverter.getCurrentEmail();
 
     OrderNotifyRequestDto notification = OrderNotifyRequestDto.builder()
             .userId(userId)
@@ -99,14 +98,16 @@ public class OrdersServiceImpl implements IOrdersService {
     log.debug("Sending order notification for userId: {}, orderId: {}",
               notification.getUserId(), notification.getOrderId());
 
-    notificationClient.orderNotifyPlaced(notification, jwt);
+    notificationClient.orderNotifyPlaced(notification);
 
     evetPublisher.publishOrderPlaced(userId, order);
   }
 
   @Override
   public List<OrderDto> getUserOrders(String userId) {
-    List<Order> orders = orderRepository.findByUserId(userId);
+//    List<UserDto> users = userClient.getAllUsers();
+    String currentUserId = jwtAuthenticationConverter.getCurrentUserId();
+    List<Order> orders = orderRepository.findByUserId(currentUserId);
     if (orders.isEmpty()) {
       log.warn("No orders found for user: {}", userId);
       return List.of();
@@ -116,7 +117,7 @@ public class OrdersServiceImpl implements IOrdersService {
     return orders.stream()
             .map(order -> OrderDto.builder()
                     .orderId(order.getOrderId())
-                    .userId(order.getUserId())
+                    .userId(String.valueOf(order.getUserId()))
                     .totalPrice(order.getTotalPrice())
                     .items(order.getItems().stream()
                             .map(item -> OrderItem.builder()
@@ -138,7 +139,7 @@ public class OrdersServiceImpl implements IOrdersService {
       return orders.stream()
               .map(order -> OrderDto.builder()
                       .orderId(order.getOrderId())
-                      .userId(order.getUserId())
+                      .userId(String.valueOf(order.getUserId()))
                       .totalPrice(order.getTotalPrice())
                       .items(order.getItems().stream()
                               .map(item -> OrderItem.builder()
@@ -161,7 +162,7 @@ public class OrdersServiceImpl implements IOrdersService {
             .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
     order.setOrderStatus(OrderStatus.PAID);
-    order.setUpdatedAt(LocalDateTime.now());
+    order.setUpdatedAt(Instant.now());
     order.setUpdatedBy("SYSTEM"); // Assuming system update
     orderRepository.save(order);
     log.info("2. ✅ Order {} status changed to PAID", orderId);
@@ -176,7 +177,7 @@ public class OrdersServiceImpl implements IOrdersService {
 
     OrderDto orderDto = OrderDto.builder()
             .orderId(order.getOrderId())
-            .userId(order.getUserId())
+            .userId(String.valueOf(order.getUserId()))
             .totalPrice(order.getTotalPrice())
             .items(order.getItems().stream()
                     .map(item -> OrderItem.builder()
@@ -190,13 +191,30 @@ public class OrdersServiceImpl implements IOrdersService {
     return orderDto;
   }
 
+  @Override
+  public void cancelOrder(Long orderId) {
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException("Order not found"));
+
+    if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+      log.warn("Order {} is already cancelled", orderId);
+      return;
+    }
+
+    order.setOrderStatus(OrderStatus.CANCELLED);
+    order.setUpdatedAt(Instant.now());
+    order.setUpdatedBy("SYSTEM"); // Assuming system update
+    orderRepository.save(order);
+    log.info("Order {} has been cancelled", orderId);
+    logAudit("ORDER_CANCELLED", "Order cancelled successfully for orderId: " + orderId);
+  }
+
   private void logAudit(String action, String details) {
     String clientIp = request.getRemoteAddr();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     String username = auth != null ? auth.getName() : "anonymous";
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-    String userId = jwtAuthenticationConverter.extractUserId(jwt);
-
+    Jwt jwt = jwtAuthenticationConverter.getCurrentJwt();
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
 
     auditLogService.log(
             action,

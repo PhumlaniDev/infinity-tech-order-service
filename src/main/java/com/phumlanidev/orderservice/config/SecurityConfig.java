@@ -28,7 +28,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/v1/notifications/payment-confirmation")
                             .hasRole("notification-service-role")
                     .requestMatchers("/api/v1/order/admin").hasRole("admin")
-            .requestMatchers("/api/v1/order/**").hasRole("order-service-role")
+            .requestMatchers("/api/v1/order/**").authenticated()
             )
             .oauth2ResourceServer(oauth2 ->
                     oauth2.jwt(jwt ->

@@ -10,8 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-
 /**
  * Comment: this is the placeholder for documentation.
  */
@@ -31,7 +29,6 @@ public class AuditLogServiceImpl {
             .username(username)
             .ipAddress(ipAddress)
             .details(details)
-            .timestamp(Instant.now())
             .build();
 
     auditLogRepository.save(log);

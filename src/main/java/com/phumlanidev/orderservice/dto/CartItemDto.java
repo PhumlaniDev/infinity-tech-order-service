@@ -2,7 +2,9 @@ package com.phumlanidev.orderservice.dto;
 
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -11,6 +13,8 @@ import java.math.BigDecimal;
  * Comment: this is the placeholder for documentation.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartItemDto {
 
   @NotNull(message = "Product ID is required")

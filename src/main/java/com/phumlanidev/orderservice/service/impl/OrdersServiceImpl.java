@@ -1,23 +1,19 @@
 package com.phumlanidev.orderservice.service.impl;
 
 import com.phumlanidev.orderservice.client.NotificationClient;
-import com.phumlanidev.orderservice.config.JwtAuthenticationConverter;
+import com.phumlanidev.orderservice.constant.Constant;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
 import com.phumlanidev.orderservice.dto.OrderNotifyRequestDto;
 import com.phumlanidev.orderservice.enums.OrderStatus;
-import com.phumlanidev.orderservice.event.NotificationEvetPublisher;
 import com.phumlanidev.orderservice.exception.order.OrderNotFoundException;
 import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
 import com.phumlanidev.orderservice.repository.OrderRepository;
 import com.phumlanidev.orderservice.service.IOrdersService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.phumlanidev.orderservice.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,20 +28,13 @@ public class OrdersServiceImpl implements IOrdersService {
 
   private final OrderRepository orderRepository;
   private final CartServiceClient cartServiceClient;
-  private final NotificationEvetPublisher evetPublisher;
-  private final HttpServletRequest request;
   private final AuditLogServiceImpl auditLogService;
-  private final JwtAuthenticationConverter jwtAuthenticationConverter;
   private final NotificationClient notificationClient;
-//  private final UserClient userClient;
+  private final SecurityUtils securityUtils;
 
   @Override
   public void placeOrder(String userId) {
-    String token = request.getHeader("Authorization"); // Remove "Bearer " prefix
-
-    if (token == null || !token.startsWith("Bearer ")) {
-      throw new IllegalArgumentException("Invalid or missing Authorization header");
-    }
+    String token = securityUtils.getCurrentToken();
 
     CartDto cart = cartServiceClient.getCart(userId, token);
 
@@ -84,8 +73,7 @@ public class OrdersServiceImpl implements IOrdersService {
     orderRepository.save(order);
 
     logAudit("ORDER_PLACED", "Order placed successfully for user: " + userId);
-    Jwt jwt = jwtAuthenticationConverter.getCurrentJwt();
-    String emailRecipient = jwtAuthenticationConverter.getCurrentEmail();
+    String emailRecipient = securityUtils.getCurrentEmail();
 
     OrderNotifyRequestDto notification = OrderNotifyRequestDto.builder()
             .userId(userId)
@@ -99,14 +87,11 @@ public class OrdersServiceImpl implements IOrdersService {
               notification.getUserId(), notification.getOrderId());
 
     notificationClient.orderNotifyPlaced(notification);
-
-    evetPublisher.publishOrderPlaced(userId, order);
   }
 
   @Override
   public List<OrderDto> getUserOrders(String userId) {
-//    List<UserDto> users = userClient.getAllUsers();
-    String currentUserId = jwtAuthenticationConverter.getCurrentUserId();
+    String currentUserId = securityUtils.getCurrentUserId();
     List<Order> orders = orderRepository.findByUserId(currentUserId);
     if (orders.isEmpty()) {
       log.warn("No orders found for user: {}", userId);
@@ -159,7 +144,7 @@ public class OrdersServiceImpl implements IOrdersService {
   @Override
   public void markOrderAsPaid(Long orderId) {
     Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+            .orElseThrow(() -> new IllegalArgumentException(Constant.ORDER_NOT_FOUND));
 
     order.setOrderStatus(OrderStatus.PAID);
     order.setUpdatedAt(Instant.now());
@@ -210,11 +195,9 @@ public class OrdersServiceImpl implements IOrdersService {
   }
 
   private void logAudit(String action, String details) {
-    String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
-    Jwt jwt = jwtAuthenticationConverter.getCurrentJwt();
-    String userId = jwtAuthenticationConverter.getCurrentUserId();
+    String clientIp = securityUtils.getCurrentClientIp();
+    String username = securityUtils.getCurrentUsername();
+    String userId = securityUtils.getCurrentUserId();
 
     auditLogService.log(
             action,

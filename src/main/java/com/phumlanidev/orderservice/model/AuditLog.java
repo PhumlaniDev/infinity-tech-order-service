@@ -33,6 +33,7 @@ public class AuditLog {
   @Column(name = "details")
   private String details;
   @Column(name = "timestamp")
+  @Builder.Default
   private Instant timestamp = Instant.now();
 
 }

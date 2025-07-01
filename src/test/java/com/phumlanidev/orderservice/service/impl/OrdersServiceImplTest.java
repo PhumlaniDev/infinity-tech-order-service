@@ -5,6 +5,7 @@ import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.CartItemDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
 import com.phumlanidev.orderservice.enums.OrderStatus;
+import com.phumlanidev.orderservice.exception.order.OrderNotFoundException;
 import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
 import com.phumlanidev.orderservice.repository.OrderRepository;
@@ -24,7 +25,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,9 +59,9 @@ class OrdersServiceImplTest {
 
     // 2. Prepare the CartDto with items
     CartDto cartDto = new CartDto();
-    cartDto.setCartItems(List.of(new CartItemDto(1L, 2, new BigDecimal("20.00"))));
+    cartDto.setCartItems(List.of(new CartItemDto(1L, 2, null)));
 
-    when(cartServiceClient.getCart(eq(userId), anyString())).thenReturn(cartDto);
+    when(cartServiceClient.getCart(userId, token)).thenReturn(cartDto);
 
     // 3. Save Order
     Order order = Order.builder().orderId(99L).userId(userId).build();
@@ -316,7 +318,7 @@ class OrdersServiceImplTest {
   }
 
   @Test
-  void shouldThrowAnExceptionIfCartIsEmpty_placeOrder() {
+  void shouldThrowAnExceptionWhenCartIsEmpty() {
     String token = "Bearer some.jwt.token";
     String userId = "user-123";
 
@@ -392,4 +394,24 @@ class OrdersServiceImplTest {
     assertTrue(result.isEmpty());
     verify(orderRepository).findByUserId(userId);
   }
+
+  @Test
+  void shouldThrowExceptionWhenOrderNotFound() {
+    Long orderId = 999L;
+
+    when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+    OrderNotFoundException orderNotFoundException = assertThrows(
+            OrderNotFoundException.class,
+            () -> ordersServiceImpl.getOrderById(orderId)
+    );
+
+    assertEquals("Order not found", orderNotFoundException.getMessage());
+
+    verify(orderRepository).findById(orderId);
+    verify(auditLogService, never()).log(
+            anyString(), anyString(), anyString(), anyString(), anyString()
+    );
+  }
+
 }

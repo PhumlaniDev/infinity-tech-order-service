@@ -3,6 +3,7 @@ package com.phumlanidev.orderservice.service.impl;
 import com.phumlanidev.orderservice.client.NotificationClient;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.CartItemDto;
+import com.phumlanidev.orderservice.dto.OrderDto;
 import com.phumlanidev.orderservice.enums.OrderStatus;
 import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
@@ -22,8 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -91,9 +91,41 @@ class OrdersServiceImplTest {
     when(securityUtils.getCurrentUsername()).thenReturn(username);
 
     // 2. Prepare the Order list
+    OrderItem orderItem = new OrderItem();
     List<Order> orders = List.of(
-            Order.builder().orderId(1L).userId(userId).build(),
-            Order.builder().orderId(2L).userId(userId).build()
+            Order.builder()
+                    .orderId(1L)
+                    .userId(userId)
+                    .items(Stream.of(orderItem)
+                            .map(
+                                    item -> OrderItem.builder()
+                                            .productId(1L)
+                                            .quantity(3)
+                                            .priceAtPurchase(BigDecimal.valueOf(100))
+                                            .build()
+                            ).toList()).build(),
+            Order.builder()
+                    .orderId(2L)
+                    .userId(userId)
+                    .items(Stream.of(orderItem)
+                            .map(
+                                    item -> OrderItem.builder()
+                                            .productId(2L)
+                                            .quantity(3)
+                                            .priceAtPurchase(BigDecimal.valueOf(100))
+                                            .build()
+                            ).toList()).build(),
+            Order.builder()
+                    .orderId(3L)
+                    .userId(userId)
+                    .items(Stream.of(orderItem)
+                            .map(
+                                    item -> OrderItem.builder()
+                                            .productId(3L)
+                                            .quantity(3)
+                                            .priceAtPurchase(BigDecimal.valueOf(100))
+                                            .build()
+                            ).toList()).build()
     );
 
     when(orderRepository.findByUserId(userId)).thenReturn(orders);
@@ -216,10 +248,20 @@ class OrdersServiceImplTest {
     when(securityUtils.getCurrentClientIp()).thenReturn(clientIp);
 
     // 2. Prepare the order
+    OrderItem orderItem = new OrderItem();
     Order order = Order.builder()
             .orderId(orderId)
+            .orderStatus(OrderStatus.PAID)
+            .items(Stream.of(orderItem)
+                    .map(
+                            item -> OrderItem.builder()
+                                    .productId(3L)
+                                    .quantity(3)
+                                    .priceAtPurchase(BigDecimal.valueOf(100))
+                                    .build()
+                    ).toList())
             .userId(userId)
-            .build();
+            .updatedAt(Instant.now()).build();
     when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
     // 3. Call method under test
@@ -298,6 +340,56 @@ class OrdersServiceImplTest {
     verify(orderRepository, never()).save(any());
     verify(notificationClient, never()).orderNotifyPlaced(any());
   }
-  
-  
+
+  @Test
+  void shouldNotProceedIfOrderIsCancelled() {
+    Long orderId = 1L;
+    Order cancelledOrder = Order.builder()
+            .orderId(orderId)
+            .orderStatus(OrderStatus.CANCELLED)
+            .build();
+
+    when(orderRepository.findById(orderId)).thenReturn(Optional.of(cancelledOrder));
+
+    ordersServiceImpl.cancelOrder(orderId);
+
+    verify(orderRepository, never()).save(any());
+    // Optionally, use a log-capturing utility to verify the log message if needed
+  }
+
+  @Test
+  void shouldReturnEmptyListAndLogWarningIfNoOrdersInSystem() {
+    when(orderRepository.findAll()).thenReturn(List.of());
+
+    List<OrderDto> result = ordersServiceImpl.getAllOrders();
+
+    assertTrue(result.isEmpty());
+    verify(orderRepository).findAll();
+    // Optional: capture and assert the log
+  }
+
+  @Test
+  void shouldProcessOrdersWhenListIsNotEmpty() {
+    Order order = Order.builder().orderId(1L).userId("user-1").build();
+    when(orderRepository.findAll()).thenReturn(List.of(order));
+
+    List<OrderDto> result = ordersServiceImpl.getAllOrders();
+
+    assertFalse(result.isEmpty());
+    assertEquals(1, result.size());
+    assertEquals("user-1", result.getFirst().getUserId());
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenUserHasNoOrders() {
+    String userId = "user-123";
+
+    when(securityUtils.getCurrentUserId()).thenReturn(userId);
+    when(orderRepository.findByUserId(userId)).thenReturn(List.of());
+
+    List<OrderDto> result = ordersServiceImpl.getUserOrders(userId);
+
+    assertTrue(result.isEmpty());
+    verify(orderRepository).findByUserId(userId);
+  }
 }

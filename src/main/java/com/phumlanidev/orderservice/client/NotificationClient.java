@@ -1,7 +1,7 @@
 package com.phumlanidev.orderservice.client;
 
-import com.phumlanidev.orderservice.config.JwtAuthenticationConverter;
 import com.phumlanidev.orderservice.dto.OrderNotifyRequestDto;
+import com.phumlanidev.orderservice.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class NotificationClient {
 
   private final RestTemplate restTemplate;
-  private final JwtAuthenticationConverter jwtAuthenticationConverter;
+  private final SecurityUtils securityUtils;
   private final HttpServletRequest request;
 
   public void orderNotifyPlaced(OrderNotifyRequestDto orderRequestDto) {
@@ -33,7 +33,7 @@ public class NotificationClient {
 
     HttpEntity<OrderNotifyRequestDto> entity = new HttpEntity<>(orderRequestDto, headers);
 
-    String userEmail = jwtAuthenticationConverter.getCurrentEmail();
+    String userEmail = securityUtils.getCurrentEmail();
     orderRequestDto.setToEmail(userEmail);
 
     //Build the notification request payload

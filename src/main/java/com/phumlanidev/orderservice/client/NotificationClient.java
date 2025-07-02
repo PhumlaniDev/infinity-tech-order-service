@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -35,15 +33,6 @@ public class NotificationClient {
 
     String userEmail = securityUtils.getCurrentEmail();
     orderRequestDto.setToEmail(userEmail);
-
-    //Build the notification request payload
-    Map<String, Object> body = Map.of(
-      "userId", orderRequestDto.getUserId(),
-      "orderId", orderRequestDto.getOrderId(),
-      "toEmail", userEmail,
-      "total", orderRequestDto.getTotal(),
-      "timestamp", orderRequestDto.getTimestamp()
-    );
 
     try {
       restTemplate.postForEntity(  "http://localhost:9500/api/v1/notifications/email",

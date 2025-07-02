@@ -32,9 +32,6 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
     authorities.addAll(extractResourceRoles(jwt));
     authorities.addAll(extractTopLevelRoles(jwt));
 
-    System.out.println("🔐 Extracted authorities from token:");
-    authorities.forEach(a -> System.out.println(" -> " + a.getAuthority()));
-
     return new JwtAuthenticationToken(jwt, authorities, getPrincipleClaimName(jwt));
   }
 

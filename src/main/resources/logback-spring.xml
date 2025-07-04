@@ -1,24 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+  <!-- Console Logging -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Loki Logging -->
   <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
     <lokiHttp>
       <url>http://localhost:3100/loki/api/v1/push</url>
     </lokiHttp>
     <format>
-      <pattern>
-        {
+      <label>
+        <pattern>
+          {
           ""app": "order-service",
-          "time": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",
+<!--          "time": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",-->
           "level": "%level",
-          "thread": "%thread",
+          "environment": "dev",
+<!--          "thread": "%thread",-->
           "logger": "%logger{36}",
-          "message": "%msg"
-      </pattern>
+<!--          "message": "%msg"-->
+        </pattern>
+        <readMarkers>true</readMarkers>
+      </label>
+      <message>
+        <pattern>
+          %d{yyyy-MM-dd HH:mm:ss} [%thread] %magenta(%-5level) %green([%-50.50class]) >>> %cyan(%msg) %n
+        </pattern>
+      </message>
     </format>
   </appender>
 
+  <!-- Root Logger -->
   <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
     <appender-ref ref="LOKI"/>
   </root>
 

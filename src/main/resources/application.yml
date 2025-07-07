@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: docker,dev
+    active: docker
   application:
     name: order-service
   config:

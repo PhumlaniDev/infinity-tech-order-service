@@ -21,9 +21,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
-class NotificationClientTest {
+class NotificationClientxTest {
 
-  @InjectMocks private NotificationClient notificationClient;
+  @InjectMocks private NotificationClientx notificationClientx;
   @Mock private RestTemplate restTemplate;
   @Mock private SecurityUtils securityUtils;
   @Mock private HttpServletRequest request;
@@ -53,7 +53,7 @@ class NotificationClientTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer token");
     when(securityUtils.getCurrentEmail()).thenReturn("user@example.com");
 
-    notificationClient.orderNotifyPlaced(orderRequestDto);
+    notificationClientx.orderNotifyPlaced(orderRequestDto);
 
     verify(restTemplate).postForEntity(
             "http://localhost:9500/api/v1/notifications/email",
@@ -82,7 +82,7 @@ class NotificationClientTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer token");
     when(securityUtils.getCurrentEmail()).thenReturn("user@example.com");
 
-    notificationClient.orderNotifyPlaced(orderRequestDto);
+    notificationClientx.orderNotifyPlaced(orderRequestDto);
 
     verify(restTemplate).postForEntity(
             anyString(),
@@ -116,7 +116,7 @@ class NotificationClientTest {
             eq(Void.class)
     );
 
-    notificationClient.orderNotifyPlaced(orderRequestDto);
+    notificationClientx.orderNotifyPlaced(orderRequestDto);
 
     verify(restTemplate).postForEntity(
             eq("http://localhost:9500/api/v1/notifications/email"),

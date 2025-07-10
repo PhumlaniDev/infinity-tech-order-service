@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-  <!-- Console Logging -->
+  <!-- Console Appender -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n</pattern>
     </encoder>
   </appender>
 
-  <!-- Loki Logging -->
+  <!-- Loki Appender -->
   <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
     <http>
-      <url>http://localhost:3100/loki/api/v1/push</url>
+      <url>http://loki:3100/loki/api/v1/push</url>
+      <connectTimeoutMs>1000</connectTimeoutMs>
+      <readTimeoutMs>1000</readTimeoutMs>
     </http>
-    <format>
-      <label>
-        <pattern>app=order-service, environment=dev, level=%level, logger=%logger{36}</pattern>
-        <readMarkers>true</readMarkers>
-      </label>
-      <message>
-        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %magenta(%-5level) %green([%-50.50class]) >>> %cyan(%msg) %n</pattern>
-      </message>
-    </format>
+
+    <batch>
+      <maxSize>100</maxSize>
+      <maxTimeMs>5000</maxTimeMs>
+    </batch>
+
+    <label>
+      <label>app=order-service</label>
+      <label>env=dev</label>
+      <label>level=%level</label>
+      <label>thread=%thread</label>
+    </label>
+
+    <message>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] >>> %msg%n</pattern>
+    </message>
   </appender>
+
+  <!-- Enable debug logs for Loki (optional for troubleshooting) -->
+  <logger name="com.github.loki4j" level="DEBUG"/>
 
   <!-- Root Logger -->
   <root level="INFO">

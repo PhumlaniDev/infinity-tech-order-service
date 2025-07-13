@@ -1,6 +1,5 @@
 package com.phumlanidev.orderservice.service.impl;
 
-import com.phumlanidev.orderservice.client.NotificationClient;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.CartItemDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
@@ -9,6 +8,7 @@ import com.phumlanidev.orderservice.exception.order.OrderNotFoundException;
 import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
 import com.phumlanidev.orderservice.repository.OrderRepository;
+import com.phumlanidev.orderservice.utils.NotificationServiceWrapper;
 import com.phumlanidev.orderservice.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class OrdersServiceImplTest {
 
   @Mock private OrderRepository orderRepository;
   @Mock private CartServiceClient cartServiceClient;
-  @Mock private NotificationClient notificationClient;
+  @Mock private NotificationServiceWrapper notificationServiceWrapper;
   @Mock private AuditLogServiceImpl auditLogService;
   @Mock private SecurityUtils securityUtils;
 
@@ -72,7 +72,7 @@ class OrdersServiceImplTest {
 
     // 5. Verify interactions and assertions
     verify(orderRepository).save(any(Order.class));
-    verify(notificationClient).orderNotifyPlaced(any());
+    verify(notificationServiceWrapper).sendOrderPlacedNotification(any());
     verify(auditLogService).log("ORDER_PLACED",
             userId,
             username,
@@ -340,7 +340,7 @@ class OrdersServiceImplTest {
 
     // Verify interactions and assertions
     verify(orderRepository, never()).save(any());
-    verify(notificationClient, never()).orderNotifyPlaced(any());
+    verify(notificationServiceWrapper, never()).sendOrderPlacedNotification(any());
   }
 
   @Test

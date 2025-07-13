@@ -19,11 +19,15 @@
     </http>
     <format>
       <label>
-        <pattern>app=order-service, environment=dev, level=%level, thread=%thread</pattern>
+        <pattern>
+          app="%property{spring.application.name:-unknown}",
+          env="%property{spring.profiles.active:-default}",
+          level="%level"
+        </pattern>
         <readMarkers>true</readMarkers>
       </label>
       <message>
-        <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %magenta(%-5level) %green([%-50.50class]) >>> %cyan(%msg) %n</pattern>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%logger{36}] - %msg%n</pattern>
       </message>
     </format>
   </appender>

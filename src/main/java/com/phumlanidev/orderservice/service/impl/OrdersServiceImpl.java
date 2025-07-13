@@ -1,6 +1,5 @@
 package com.phumlanidev.orderservice.service.impl;
 
-import com.phumlanidev.orderservice.client.NotificationClient;
 import com.phumlanidev.orderservice.constant.Constant;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
@@ -11,6 +10,7 @@ import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
 import com.phumlanidev.orderservice.repository.OrderRepository;
 import com.phumlanidev.orderservice.service.IOrdersService;
+import com.phumlanidev.orderservice.utils.NotificationServiceWrapper;
 import com.phumlanidev.orderservice.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class OrdersServiceImpl implements IOrdersService {
   private final OrderRepository orderRepository;
   private final CartServiceClient cartServiceClient;
   private final AuditLogServiceImpl auditLogService;
-  private final NotificationClient notificationClient;
+  private final NotificationServiceWrapper notificationServiceWrapper;
   private final SecurityUtils securityUtils;
 
   @Override
@@ -86,7 +86,7 @@ public class OrdersServiceImpl implements IOrdersService {
     log.debug("Sending order notification for userId: {}, orderId: {}",
               notification.getUserId(), notification.getOrderId());
 
-    notificationClient.orderNotifyPlaced(notification);
+    notificationServiceWrapper.sendOrderPlacedNotification(notification);
   }
 
   @Override

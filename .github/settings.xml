@@ -3,50 +3,50 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
   <!-- Authentication for Nexus deployment -->
-  <servers>
-    <server>
-      <id>nexus-snapshots</id>
-      <username>github-deploy</username>
-      <password>${env.NEXUS_DEPLOY_TOKEN}</password>
-    </server>
-    <server>
-      <id>nexus-releases</id>
-      <username>github-deploy</username>
-      <password>${env.NEXUS_DEPLOY_TOKEN}</password>
-    </server>
-    <server>
-      <id>github</id>
-      <username>${env.GITHUB_ACTOR}</username>
-      <password>${env.GITHUB_TOKEN}</password>
-    </server>
-  </servers>
+<!--  <servers>-->
+<!--    <server>-->
+<!--      <id>nexus-snapshots</id>-->
+<!--      <username>github-deploy</username>-->
+<!--      <password>${env.NEXUS_DEPLOY_TOKEN}</password>-->
+<!--    </server>-->
+<!--    <server>-->
+<!--      <id>nexus-releases</id>-->
+<!--      <username>github-deploy</username>-->
+<!--      <password>${env.NEXUS_DEPLOY_TOKEN}</password>-->
+<!--    </server>-->
+<!--    <server>-->
+<!--      <id>github</id>-->
+<!--      <username>${env.GITHUB_ACTOR}</username>-->
+<!--      <password>${env.GITHUB_TOKEN}</password>-->
+<!--    </server>-->
+<!--  </servers>-->
 
-  <!-- Always check Nexus first, then Maven Central if not found -->
-  <mirrors>
-    <mirror>
-      <id>internal-nexus</id>
-      <mirrorOf>central</mirrorOf>
-      <url>https://nexus.phumlaniarendse.co.za/repository/maven-public/</url>
-    </mirror>
-  </mirrors>
+<!--  &lt;!&ndash; Always check Nexus first, then Maven Central if not found &ndash;&gt;-->
+<!--  <mirrors>-->
+<!--    <mirror>-->
+<!--      <id>internal-nexus</id>-->
+<!--      <mirrorOf>central</mirrorOf>-->
+<!--      <url>https://nexus.phumlaniarendse.co.za/repository/maven-public/</url>-->
+<!--    </mirror>-->
+<!--  </mirrors>-->
 
-  <!-- Enable GitHub registry (manual reference, not mirrored) -->
-  <profiles>
-    <profile>
-      <id>github</id>
-      <repositories>
-        <repository>
-          <id>github</id>
-          <url>https://maven.pkg.github.com/phumlanidev/infinitytechorderservice</url>
-          <releases><enabled>true</enabled></releases>
-          <snapshots><enabled>true</enabled></snapshots>
-        </repository>
-      </repositories>
-    </profile>
-  </profiles>
+<!--  &lt;!&ndash; Enable GitHub registry (manual reference, not mirrored) &ndash;&gt;-->
+<!--  <profiles>-->
+<!--    <profile>-->
+<!--      <id>github</id>-->
+<!--      <repositories>-->
+<!--        <repository>-->
+<!--          <id>github</id>-->
+<!--          <url>https://maven.pkg.github.com/phumlanidev/infinitytechorderservice</url>-->
+<!--          <releases><enabled>true</enabled></releases>-->
+<!--          <snapshots><enabled>true</enabled></snapshots>-->
+<!--        </repository>-->
+<!--      </repositories>-->
+<!--    </profile>-->
+<!--  </profiles>-->
 
-  <activeProfiles>
-    <activeProfile>github</activeProfile>
-  </activeProfiles>
+<!--  <activeProfiles>-->
+<!--    <activeProfile>github</activeProfile>-->
+<!--  </activeProfiles>-->
 
 </settings>

@@ -37,7 +37,7 @@
       <repositories>
         <repository>
           <id>github</id>
-          <url>https://maven.pkg.github.com/phumlanidev/techhivestore</url>
+          <url>https://maven.pkg.github.com/phumlanidev/infinitytechorderservice</url>
           <releases><enabled>true</enabled></releases>
           <snapshots><enabled>true</enabled></snapshots>
         </repository>

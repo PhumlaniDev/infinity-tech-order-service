@@ -185,16 +185,16 @@
     </dependencies>
   </dependencyManagement>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>nexus-snapshots</id>
-      <url>https://nexus.phumlaniarendse.co.za/repository/maven-snapshots/</url>
-    </snapshotRepository>
-    <repository>
-      <id>nexus-releases</id>
-      <url>https://nexus.phumlaniarendse.co.za/repository/maven-releases/</url>
-    </repository>
-  </distributionManagement>
+<!--  <distributionManagement>-->
+<!--    <snapshotRepository>-->
+<!--      <id>nexus-snapshots</id>-->
+<!--      <url>https://nexus.phumlaniarendse.co.za/repository/maven-snapshots/</url>-->
+<!--    </snapshotRepository>-->
+<!--    <repository>-->
+<!--      <id>nexus-releases</id>-->
+<!--      <url>https://nexus.phumlaniarendse.co.za/repository/maven-releases/</url>-->
+<!--    </repository>-->
+<!--  </distributionManagement>-->
 
 
   <build>

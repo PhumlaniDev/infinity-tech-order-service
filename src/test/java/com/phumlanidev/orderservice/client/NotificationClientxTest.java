@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @RequiredArgsConstructor
 class NotificationClientxTest {
 
-  @InjectMocks private NotificationClientx notificationClientx;
+  @InjectMocks private NotificationClient notificationClient;
   @Mock private RestTemplate restTemplate;
   @Mock private SecurityUtils securityUtils;
   @Mock private HttpServletRequest request;
@@ -53,7 +53,7 @@ class NotificationClientxTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer token");
     when(securityUtils.getCurrentEmail()).thenReturn("user@example.com");
 
-    notificationClientx.orderNotifyPlaced(orderRequestDto);
+    notificationClient.orderNotifyPlaced(orderRequestDto);
 
     verify(restTemplate).postForEntity(
             "http://localhost:9500/api/v1/notifications/email",
@@ -82,7 +82,7 @@ class NotificationClientxTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer token");
     when(securityUtils.getCurrentEmail()).thenReturn("user@example.com");
 
-    notificationClientx.orderNotifyPlaced(orderRequestDto);
+    notificationClient.orderNotifyPlaced(orderRequestDto);
 
     verify(restTemplate).postForEntity(
             anyString(),
@@ -116,7 +116,7 @@ class NotificationClientxTest {
             eq(Void.class)
     );
 
-    notificationClientx.orderNotifyPlaced(orderRequestDto);
+    notificationClient.orderNotifyPlaced(orderRequestDto);
 
     verify(restTemplate).postForEntity(
             eq("http://localhost:9500/api/v1/notifications/email"),

@@ -16,7 +16,7 @@ public class NotificationServiceWrapper {
   private final NotificationClient notificationClient;
 
   @CircuitBreaker(name = "notificationService",
-                  fallbackMethod = "sendNotificationFallback")
+                  fallbackMethod = "fallbackNotify")
   @Retry(name = "notificationService")
   public void sendOrderPlacedNotification(OrderNotifyRequestDto orderRequestDto) {
     notificationClient.orderNotifyPlaced(orderRequestDto);

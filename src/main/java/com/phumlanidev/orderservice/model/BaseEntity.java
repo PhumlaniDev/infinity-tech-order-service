@@ -17,9 +17,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
-/**
- * Comment: this is the placeholder for documentation.
- */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter

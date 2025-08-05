@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  * Comment: this is the placeholder for documentation.
  */
 @Data
+
 public class OrderItemDto {
 
   @NotNull(message = "Product ID is required")

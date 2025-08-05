@@ -1,16 +1,16 @@
 package com.phumlanidev.orderservice.service.impl;
 
+import com.phumlanidev.commonevents.events.OrderPlacedEvent;
 import com.phumlanidev.orderservice.constant.Constant;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
-import com.phumlanidev.orderservice.dto.OrderNotifyRequestDto;
 import com.phumlanidev.orderservice.enums.OrderStatus;
+import com.phumlanidev.orderservice.event.publiser.OrderPlacedEventPublisher;
 import com.phumlanidev.orderservice.exception.order.OrderNotFoundException;
 import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
 import com.phumlanidev.orderservice.repository.OrderRepository;
 import com.phumlanidev.orderservice.service.IOrdersService;
-import com.phumlanidev.orderservice.utils.NotificationServiceWrapper;
 import com.phumlanidev.orderservice.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +30,12 @@ public class OrdersServiceImpl implements IOrdersService {
   private final OrderRepository orderRepository;
   private final CartServiceClient cartServiceClient;
   private final AuditLogServiceImpl auditLogService;
-  private final NotificationServiceWrapper notificationServiceWrapper;
+  private final OrderPlacedEventPublisher orderPlacedEventPublisher;
   private final SecurityUtils securityUtils;
 
   @Override
   public void placeOrder(String userId) {
-    String token = securityUtils.getCurrentToken();
+    String token = securityUtils.getCurrentAuthorizationHeader();
 
     CartDto cart = cartServiceClient.getCart(userId, token);
 
@@ -75,18 +76,22 @@ public class OrdersServiceImpl implements IOrdersService {
     logAudit("ORDER_PLACED", "Order placed successfully for user: " + userId);
     String emailRecipient = securityUtils.getCurrentEmail();
 
-    OrderNotifyRequestDto notification = OrderNotifyRequestDto.builder()
+    OrderPlacedEvent event = OrderPlacedEvent.builder()
             .userId(userId)
             .orderId(order.getOrderId())
             .total(totalPrice)
             .toEmail(emailRecipient) // Assuming username is the email
             .timestamp(Instant.now())
+            .items(orderItems.stream()
+                    .map(item -> new OrderPlacedEvent.OrderItemDto(
+                            item.getProductId(), item.getQuantity()
+                    )).collect(Collectors.toList()))
             .build();
 
     log.debug("Sending order notification for userId: {}, orderId: {}",
-              notification.getUserId(), notification.getOrderId());
+            event.getUserId(), event.getOrderId());
 
-    notificationServiceWrapper.sendOrderPlacedNotification(notification);
+    orderPlacedEventPublisher.publishOrderPlacedEvent(event);
   }
 
   @Override

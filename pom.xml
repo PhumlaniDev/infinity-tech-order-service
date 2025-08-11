@@ -125,7 +125,7 @@
     <dependency>
       <groupId>com.stripe</groupId>
       <artifactId>stripe-java</artifactId>
-      <version>29.2.0</version>
+      <version>29.4.0</version>
     </dependency>
 
     <!-- Monitoring/Prometheus -->
@@ -190,12 +190,12 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.phumlanidev</groupId>
+      <groupId>com.phumlanidev.commonevents</groupId>
       <artifactId>common-events</artifactId>
       <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -205,7 +205,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
@@ -213,34 +212,101 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.19.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>1.4.21</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>10.4.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>33.4.8-android</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
-<!--  <distributionManagement>-->
-<!--    <snapshotRepository>-->
-<!--      <id>nexus-snapshots</id>-->
-<!--      <url>https://nexus.phumlaniarendse.co.za/repository/maven-snapshots/</url>-->
-<!--    </snapshotRepository>-->
-<!--    <repository>-->
-<!--      <id>nexus-releases</id>-->
-<!--      <url>https://nexus.phumlaniarendse.co.za/repository/maven-releases/</url>-->
-<!--    </repository>-->
-<!--  </distributionManagement>-->
+  <distributionManagement>
+    <repository>
+      <id>nexus-releases</id>
+      <name>Nexus Releases Repository</name>
+      <url>https://nexus.phumlaniarendse.co.za/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <name>Nexus Snapshots Repository</name>
+      <url>https://nexus.phumlaniarendse.co.za/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 
+  <repositories>
+    <repository>
+      <id>nexus</id>
+      <url>https://nexus.phumlaniarendse.co.za/repository/maven-public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <build>
     <plugins>
-      <!--spring maven-->
+      <!-- Standard JAR for deployment -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Fat jar for local run -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <phase>package</phase> <!-- Only runs when packaging -->
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <classifier>exec</classifier> <!-- Fat jar gets "-exec" suffix -->
+              <excludeDevtools>false</excludeDevtools>
+            </configuration>
+          </execution>
+        </executions>
         <configuration>
-          <excludes>
-            <exclude>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-            </exclude>
-          </excludes>
+          <!-- Ensure fat jar is NOT attached to deploy -->
+          <attach>false</attach>
         </configuration>
       </plugin>
 
@@ -285,7 +351,7 @@
               <goal>prepare-agent</goal>
             </goals>
           </execution>
-          <!-- Generate report after tests -->
+          <!-- Generate a report after tests -->
           <execution>
             <id>report</id>
             <phase>test</phase>
@@ -295,6 +361,7 @@
           </execution>
         </executions>
       </plugin>
+
       <!--  Maven Surefire  -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

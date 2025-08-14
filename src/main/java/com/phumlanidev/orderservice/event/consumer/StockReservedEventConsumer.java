@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,6 @@ public class StockReservedEventConsumer {
   private final OrderFailedNotificationEventPublisher orderFailedNotificationEventPublisher;
 
   @Retryable(
-          maxAttempts = 3,
           backoff = @Backoff(delay = 1000, multiplier = 2),
           retryFor = {RecoverableDataAccessException.class},
           noRetryFor = {IllegalAccessException.class}
@@ -52,7 +50,6 @@ public class StockReservedEventConsumer {
   }
 
   @Retryable(
-          maxAttempts = 3,
           backoff = @Backoff(delay = 1000, multiplier = 2),
           retryFor = {RecoverableDataAccessException.class},
           noRetryFor = {IllegalAccessException.class}
@@ -63,7 +60,7 @@ public class StockReservedEventConsumer {
           containerFactory = "stockReservedFailedEventContainerFactory",
           errorHandler = "stockReservedFailedEventKafkaListenerErrorHandler"
   )
-  public void onStockFailed(ConsumerRecord<String, StockReservationFailedEvent> record, Acknowledgment ack) {
+  public void onStockFailed(ConsumerRecord<String, StockReservationFailedEvent> record) {
     StockReservationFailedEvent event = record.value();
       log.warn("❌ Stock reservation failed for order {}: {}", event.getOrderId(), event.getReason());
       OrderFailedNotificationEvent notificationEvent = OrderFailedNotificationEvent.builder()

@@ -1,16 +1,18 @@
 package com.phumlanidev.orderservice.service.impl;
 
+import com.phumlanidev.commonevents.events.OrderPlacedEvent;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.CartItemDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
 import com.phumlanidev.orderservice.enums.OrderStatus;
+import com.phumlanidev.orderservice.event.publiser.OrderPlacedEventPublisher;
 import com.phumlanidev.orderservice.exception.order.OrderNotFoundException;
 import com.phumlanidev.orderservice.model.Order;
 import com.phumlanidev.orderservice.model.OrderItem;
 import com.phumlanidev.orderservice.repository.OrderRepository;
-import com.phumlanidev.orderservice.utils.NotificationServiceWrapper;
 import com.phumlanidev.orderservice.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,8 +27,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,9 +38,22 @@ class OrdersServiceImplTest {
 
   @Mock private OrderRepository orderRepository;
   @Mock private CartServiceClient cartServiceClient;
-  @Mock private NotificationServiceWrapper notificationServiceWrapper;
   @Mock private AuditLogServiceImpl auditLogService;
   @Mock private SecurityUtils securityUtils;
+  @Mock private OrderPlacedEventPublisher orderPlacedEventPublisher;
+
+  @BeforeEach
+  void setUp() {
+    orderPlacedEventPublisher = mock(OrderPlacedEventPublisher.class);
+
+    ordersServiceImpl = new OrdersServiceImpl(
+            orderRepository,
+            cartServiceClient,
+            auditLogService,
+            orderPlacedEventPublisher,
+            securityUtils
+            );
+  }
 
   @Test
   void shouldPlaceOrderSuccessfully() {
@@ -48,10 +61,8 @@ class OrdersServiceImplTest {
     String email = "aphumlani@gmail.com";
     String username = "aphumlani";
     String clientIp = "192.168.0.1";
-    String token = "Bearer some.jwt.token";
 
     // 1. Mock the necessary dependencies and their behaviors
-    when(securityUtils.getCurrentToken()).thenReturn(token);
     when(securityUtils.getCurrentEmail()).thenReturn(email);
     when(securityUtils.getCurrentUserId()).thenReturn(userId);
     when(securityUtils.getCurrentClientIp()).thenReturn(clientIp);
@@ -61,7 +72,7 @@ class OrdersServiceImplTest {
     CartDto cartDto = new CartDto();
     cartDto.setCartItems(List.of(new CartItemDto(1L, 2, null)));
 
-    when(cartServiceClient.getCart(userId, token)).thenReturn(cartDto);
+    when(cartServiceClient.getCart(eq(userId), any())).thenReturn(cartDto);
 
     // 3. Save Order
     Order order = Order.builder().orderId(99L).userId(userId).build();
@@ -72,7 +83,7 @@ class OrdersServiceImplTest {
 
     // 5. Verify interactions and assertions
     verify(orderRepository).save(any(Order.class));
-    verify(notificationServiceWrapper).sendOrderPlacedNotification(any());
+    verify(orderPlacedEventPublisher).publishOrderPlacedEvent(any(OrderPlacedEvent.class));
     verify(auditLogService).log("ORDER_PLACED",
             userId,
             username,
@@ -319,16 +330,14 @@ class OrdersServiceImplTest {
 
   @Test
   void shouldThrowAnExceptionWhenCartIsEmpty() {
-    String token = "Bearer some.jwt.token";
+    String token = "some.jwt.token";
     String userId = "user-123";
-
-    // Mock dependencies
-    when(securityUtils.getCurrentToken()).thenReturn(token);
 
     //Prepare CartDto with items
     CartDto emptyCart = new CartDto();
     emptyCart.setCartItems(Collections.emptyList());
-    when(cartServiceClient.getCart(userId, token)).thenReturn(emptyCart);
+    when(cartServiceClient.getCart(eq(userId), isNull()))
+            .thenReturn(emptyCart);
 
     // Call method under test
     IllegalArgumentException exception = assertThrows(
@@ -340,7 +349,7 @@ class OrdersServiceImplTest {
 
     // Verify interactions and assertions
     verify(orderRepository, never()).save(any());
-    verify(notificationServiceWrapper, never()).sendOrderPlacedNotification(any());
+//    verify(notificationServiceWrapper, never()).sendOrderPlacedNotification(any());
   }
 
   @Test

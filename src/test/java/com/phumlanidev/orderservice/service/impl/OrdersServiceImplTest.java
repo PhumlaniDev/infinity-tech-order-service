@@ -330,7 +330,6 @@ class OrdersServiceImplTest {
 
   @Test
   void shouldThrowAnExceptionWhenCartIsEmpty() {
-    String token = "some.jwt.token";
     String userId = "user-123";
 
     //Prepare CartDto with items

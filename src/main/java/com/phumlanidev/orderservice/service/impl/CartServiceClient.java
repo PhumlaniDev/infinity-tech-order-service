@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 public class CartServiceClient {
 
   @Autowired
-  private ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
   private final RestTemplate restTemplate;
 
   /**

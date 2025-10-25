@@ -1,6 +1,6 @@
 package com.phumlanidev.orderservice.event.errorhandler;
 
-import com.phumlanidev.commonevents.events.OrderFailedNotificationEvent;
+import com.phumlanidev.commonevents.events.order.OrderFailedNotificationEvent;
 import com.phumlanidev.orderservice.event.dlq.OrderFailedNotificationEventDlqPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

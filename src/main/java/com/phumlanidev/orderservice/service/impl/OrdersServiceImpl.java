@@ -1,6 +1,8 @@
 package com.phumlanidev.orderservice.service.impl;
 
-import com.phumlanidev.commonevents.events.OrderPlacedEvent;
+
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent.OrderItemDto;
 import com.phumlanidev.orderservice.constant.Constant;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
@@ -83,9 +85,11 @@ public class OrdersServiceImpl implements IOrdersService {
             .toEmail(emailRecipient) // Assuming username is the email
             .timestamp(Instant.now())
             .items(orderItems.stream()
-                    .map(item -> new OrderPlacedEvent.OrderItemDto(
-                            item.getProductId(), item.getQuantity()
-                    )).collect(Collectors.toList()))
+                    .map(item -> OrderItemDto.builder()
+                            .productId(item.getProductId())
+                            .quantity(item.getQuantity())
+                            .build())
+                    .collect(Collectors.toList()))
             .build();
 
     log.debug("Sending order notification for userId: {}, orderId: {}",

@@ -1,6 +1,6 @@
 package com.phumlanidev.orderservice.event.publiser;
 
-import com.phumlanidev.commonevents.events.PaymentRequestEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentRequestEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,11 @@
 package com.phumlanidev.orderservice.event.consumer;
 
 
-import com.phumlanidev.commonevents.events.*;
+import com.phumlanidev.commonevents.events.StockReservationFailedEvent;
+import com.phumlanidev.commonevents.events.StockReservedEvent;
+import com.phumlanidev.commonevents.events.order.OrderFailedNotificationEvent;
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentRequestEvent;
 import com.phumlanidev.orderservice.event.publiser.OrderFailedNotificationEventPublisher;
 import com.phumlanidev.orderservice.event.publiser.PaymentRequestedEventPublisher;
 import lombok.RequiredArgsConstructor;
@@ -41,12 +45,21 @@ public class StockReservedEventConsumer {
     StockReservedEvent event = record.value();
       log.info("✅ Stock reserved for order: {}. Proceeding to payment", event.getOrderId());
 
-    paymentRequestedEventPublisher.publishPaymentRequestedEvent(PaymentRequestEvent.builder()
-              .orderId(event.getOrderId())
-              .userId(event.getUserId())
-              .amount(calculateTotal(event.getItems()))
-              .timestamp(Instant.now())
-              .build());
+
+      try {
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.builder()
+                .orderId(event.getOrderId())
+                .userId(event.getUserId())
+                .amount(calculateTotal(event.getItems()))
+                .timestamp(Instant.now())
+                .build();
+
+        paymentRequestedEventPublisher.publishPaymentRequestedEvent(paymentRequestEvent);
+        log.info("📤 Published PaymentRequestEvent for order: {}", event.getOrderId());
+      } catch (Exception ex) {
+        log.error("Failed to publish PaymentRequestEvent for order {}: {}", event.getOrderId(), ex.getMessage(), ex);
+        throw ex; // This will trigger the retry mechanism
+      }
   }
 
   @Retryable(

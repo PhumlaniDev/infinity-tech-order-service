@@ -1,6 +1,7 @@
 package com.phumlanidev.orderservice.event.publiser;
 
-import com.phumlanidev.commonevents.events.OrderPlacedEvent;
+
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

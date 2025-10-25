@@ -1,7 +1,12 @@
 package com.phumlanidev.orderservice.config;
 
 
-import com.phumlanidev.commonevents.events.*;
+import com.phumlanidev.commonevents.events.StockReservationFailedEvent;
+import com.phumlanidev.commonevents.events.StockReservedEvent;
+import com.phumlanidev.commonevents.events.order.OrderFailedNotificationEvent;
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentRequestEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
@@ -119,6 +124,35 @@ public class KafkaConfig {
   }
 
   @Bean
+  public ConsumerFactory<String, PaymentCompletedEvent> paymentCompletedEventConsumerFactory() {
+    Map<String, Object> props = new HashMap<>();
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, "order-group");
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+    props.put("spring.deserializer.key.delegate.class", StringDeserializer.class);
+    props.put("spring.deserializer.value.delegate.class", JsonDeserializer.class);
+    props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.phumlanidev.commonevents.events");
+    props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true); // Use type headers for deserialization
+    props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.PaymentCompletedEvent");
+    return new DefaultKafkaConsumerFactory<>(props);
+  }
+
+  @Bean(name = "paymentCompletedEventConsumerContainerFactory")
+  public ConcurrentKafkaListenerContainerFactory<String, PaymentCompletedEvent> paymentCompletedEventConsumerContainerFactory(
+          DefaultErrorHandler errorHandler
+  ) {
+    ConcurrentKafkaListenerContainerFactory<String, PaymentCompletedEvent> factory =
+            new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(paymentCompletedEventConsumerFactory());
+    factory.setConcurrency(3); // Match your existing event concurrency
+    factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
+    factory.setCommonErrorHandler(errorHandler);
+    return factory;
+  }
+
+  @Bean
   public ConsumerFactory<String, StockReservationFailedEvent> stockReservedFailedEventConsumerFactory() {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -161,6 +195,11 @@ public class KafkaConfig {
   public KafkaTemplate<String, StockReservedEvent> stockReservedEventKafkaTemplate() {
     return new KafkaTemplate<>(stockReservedEventProducerFactory());
   }
+
+//  @Bean
+//  public KafkaTemplate<String, PaymentCompletedEvent> paymentEventConsumberKafkaTemplate() {
+//    return new KafkaTemplate<>(stockReservedEventProducerFactory());
+//  }
 
   @Bean
   public ProducerFactory<Object, Object> genericProducerFactory() {

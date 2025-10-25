@@ -53,8 +53,4 @@ public class Order {
   @LastModifiedBy
   @Column(insertable = false)
   private String updatedBy;
-//  @Column(name = "order_number")
-//  private UUID orderNumber;
-//  @Column(name = "payment_status")
-//  private PaymentStatus paymentStatus;
 }

@@ -1,6 +1,6 @@
 package com.phumlanidev.orderservice.service.impl;
 
-import com.phumlanidev.commonevents.events.OrderPlacedEvent;
+import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.CartItemDto;
 import com.phumlanidev.orderservice.dto.OrderDto;

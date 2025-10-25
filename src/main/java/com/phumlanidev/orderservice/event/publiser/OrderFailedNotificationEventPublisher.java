@@ -1,6 +1,6 @@
 package com.phumlanidev.orderservice.event.publiser;
 
-import com.phumlanidev.commonevents.events.OrderFailedNotificationEvent;
+import com.phumlanidev.commonevents.events.order.OrderFailedNotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.kafka.core.KafkaTemplate;

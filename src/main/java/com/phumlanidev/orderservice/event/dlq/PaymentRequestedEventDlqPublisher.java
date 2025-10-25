@@ -1,6 +1,6 @@
 package com.phumlanidev.orderservice.event.dlq;
 
-import com.phumlanidev.commonevents.events.PaymentRequestEvent;
+import com.phumlanidev.commonevents.events.payment.PaymentRequestEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

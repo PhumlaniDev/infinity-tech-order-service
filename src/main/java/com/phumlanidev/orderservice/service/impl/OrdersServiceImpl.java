@@ -3,6 +3,8 @@ package com.phumlanidev.orderservice.service.impl;
 
 import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
 import com.phumlanidev.commonevents.events.order.OrderPlacedEvent.OrderItemDto;
+import com.phumlanidev.commonevents.events.product.ProductDto;
+import com.phumlanidev.orderservice.client.ProductServiceClient;
 import com.phumlanidev.orderservice.constant.Constant;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
@@ -31,6 +33,7 @@ public class OrdersServiceImpl implements IOrdersService {
 
   private final OrderRepository orderRepository;
   private final CartServiceClient cartServiceClient;
+  private final ProductServiceClient productServiceClient;
   private final AuditLogServiceImpl auditLogService;
   private final OrderPlacedEventPublisher orderPlacedEventPublisher;
   private final SecurityUtils securityUtils;
@@ -85,12 +88,14 @@ public class OrdersServiceImpl implements IOrdersService {
             .toEmail(emailRecipient) // Assuming username is the email
             .timestamp(Instant.now())
             .items(orderItems.stream()
-                    .map(item -> OrderItemDto.builder()
-                            .productId(item.getProductId())
-                            .quantity(item.getQuantity())
-                            .build())
-                    .collect(Collectors.toList()))
-            .build();
+                    .map(item -> {
+                      ProductDto productDto = productServiceClient.getProductById(item.getProductId());
+                      return OrderItemDto.builder()
+                              .productId(item.getProductId())
+                              .quantity(item.getQuantity())
+                              .productDetails(productDto)
+                              .build();
+                    }).collect(Collectors.toList())).build();
 
     log.debug("Sending order notification for userId: {}, orderId: {}",
             event.getUserId(), event.getOrderId());

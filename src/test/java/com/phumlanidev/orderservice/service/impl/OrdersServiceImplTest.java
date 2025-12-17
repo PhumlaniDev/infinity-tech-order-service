@@ -1,6 +1,7 @@
 package com.phumlanidev.orderservice.service.impl;
 
 import com.phumlanidev.commonevents.events.order.OrderPlacedEvent;
+import com.phumlanidev.orderservice.client.ProductServiceClient;
 import com.phumlanidev.orderservice.dto.CartDto;
 import com.phumlanidev.orderservice.dto.CartItemDto;
 import com.phumlanidev.orderservice.dto.OrderDto;
@@ -38,6 +39,7 @@ class OrdersServiceImplTest {
 
   @Mock private OrderRepository orderRepository;
   @Mock private CartServiceClient cartServiceClient;
+  @Mock private ProductServiceClient productServiceClient;
   @Mock private AuditLogServiceImpl auditLogService;
   @Mock private SecurityUtils securityUtils;
   @Mock private OrderPlacedEventPublisher orderPlacedEventPublisher;
@@ -49,6 +51,7 @@ class OrdersServiceImplTest {
     ordersServiceImpl = new OrdersServiceImpl(
             orderRepository,
             cartServiceClient,
+            productServiceClient,
             auditLogService,
             orderPlacedEventPublisher,
             securityUtils

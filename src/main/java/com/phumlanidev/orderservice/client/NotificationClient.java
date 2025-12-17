@@ -1,13 +1,13 @@
 package com.phumlanidev.orderservice.client;
 
-import com.phumlanidev.orderservice.config.AuthFeingConfig;
+import com.phumlanidev.orderservice.config.AuthFeignConfig;
 import com.phumlanidev.orderservice.dto.OrderNotifyRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(
         name = "notification-service",
-        configuration = AuthFeingConfig.class
+        configuration = AuthFeignConfig.class
 )
 public interface NotificationClient {
 

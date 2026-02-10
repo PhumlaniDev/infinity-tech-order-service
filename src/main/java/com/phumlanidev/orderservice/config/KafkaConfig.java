@@ -133,9 +133,9 @@ public class KafkaConfig {
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
     props.put("spring.deserializer.key.delegate.class", StringDeserializer.class);
     props.put("spring.deserializer.value.delegate.class", JsonDeserializer.class);
-    props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.phumlanidev.commonevents.events");
+    props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.phumlanidev.commonevents.events.payment");
     props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true); // Use type headers for deserialization
-    props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.PaymentCompletedEvent");
+    props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.phumlanidev.commonevents.events.payment.PaymentCompletedEvent");
     return new DefaultKafkaConsumerFactory<>(props);
   }
 
@@ -147,7 +147,6 @@ public class KafkaConfig {
             new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(paymentCompletedEventConsumerFactory());
     factory.setConcurrency(3); // Match your existing event concurrency
-    factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
     factory.setCommonErrorHandler(errorHandler);
     return factory;
   }

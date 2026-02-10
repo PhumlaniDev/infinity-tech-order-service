@@ -16,14 +16,26 @@ public class PaymentCompletedEventConsumer {
 
   private final OrderRepository orderRepository;
 
-  @KafkaListener(topics = "payment.completed", groupId = "order-group")
+  @KafkaListener(
+          topics = "payment.completed",
+          groupId = "order-group",
+          containerFactory = "paymentCompletedEventConsumerContainerFactory"
+  )
   public void handlePaymentCompleted(PaymentCompletedEvent event) {
-    log.info("✅ Payment completed event received");
-    // Implement the logic to handle payment completion, e.g., update order status, notify user, etc.
-    Order order = orderRepository.findById(event.getOrderId())
-            .orElseThrow(() -> new RuntimeException("Order not found for ID: " + event.getOrderId()));
-    order.setOrderStatus(OrderStatus.PAID);
-    orderRepository.save(order);
-    log.info("✅ Order ID: {} marked as PAID", event.getOrderId());
+    try {
+      log.info("✅ Payment completed event received");
+      // Implement the logic to handle payment completion, e.g., update order status, notify user, etc.
+      Order order = orderRepository.findById(event.getOrderId())
+              .orElseThrow(() -> new RuntimeException("Order not found for ID: " + event.getOrderId()));
+      order.setOrderStatus(OrderStatus.PAID);
+      orderRepository.save(order);
+      log.info("✅ Order ID: {} marked as PAID", event.getOrderId());
+    } catch (Exception e) {
+      log.error("❌ Error processing PaymentCompletedEvent for order ID: {}: {}", event.getOrderId(), e.getMessage());
+      // Optionally, you can implement retry logic or send the event to a dead-letter topic
+      //publish to DLQ or retry logic here
+
+    }
+
   }
 }

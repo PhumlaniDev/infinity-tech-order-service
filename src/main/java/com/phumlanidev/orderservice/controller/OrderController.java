@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Comment: this is the placeholder for documentation.
- */
 @RestController
 @RequestMapping(path = "/api/v1/order")
 @RequiredArgsConstructor
@@ -52,9 +49,6 @@ public class OrderController {
       return ResponseEntity.ok(orderDto);
     }
 
-  //  /**
-  //   * Comment: this is the placeholder for documentation.
-  //   */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<OrderDto>> getUserOrders(@PathVariable String userId) {
       List<OrderDto> orders = ordersService.getUserOrders(userId);

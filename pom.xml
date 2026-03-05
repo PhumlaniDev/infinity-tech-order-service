@@ -85,10 +85,11 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Swagger / OpenAPI -->
+		<!--	Documentation	-->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.1.0</version>
+			<version>3.0.1</version>
 		</dependency>
 
 		<!-- JUnit -->
@@ -193,12 +194,6 @@
 			<groupId>com.phumlanidev.commonevents</groupId>
 			<artifactId>common-events</artifactId>
 			<version>3.1.0</version>
-		</dependency>
-		<!--	Documentation	-->
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>3.0.1</version>
 		</dependency>
 	</dependencies>
 

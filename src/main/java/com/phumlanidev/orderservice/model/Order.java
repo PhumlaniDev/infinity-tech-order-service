@@ -32,6 +32,8 @@ public class Order {
   private Long orderId;
   @Column(name = "user_id")
   private String userId;
+  @Column(name = "user_email")   // ← add this
+  private String userEmail;
   @Column(name = "total_price")
   private BigDecimal totalPrice;
   @Column(name = "status")

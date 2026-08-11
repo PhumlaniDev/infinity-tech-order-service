@@ -26,7 +26,7 @@
 <!--    <mirror>-->
 <!--      <id>internal-nexus</id>-->
 <!--      <mirrorOf>central</mirrorOf>-->
-<!--      <url>https://nexus.phumlaniarendse.co.za/repository/maven-public/</url>-->
+<!--      <url>https://nexus.phumlani.dev/repository/maven-public/</url>-->
 <!--    </mirror>-->
 <!--  </mirrors>-->
 
